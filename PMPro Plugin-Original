@@ -1,0 +1,207 @@
+/*note- Found under >Public_htm>wp-content>plugins>PMPro-customizations>pmpro-customizations.php
+
+Original php code for the following:
+1) Additional Admin Approvers for new member registrations:
+2) Add telephone number field to registration form
+3) Volunteer Interests
+4) Member Type (Junior, Reg, Life, Associate)
+5) Newsletter & ECSCA Info Fields
+6) Online Membership Start Date.
+7) Initial Club Membership Start Date (Year).
+
+
+<?php
+/*
+Plugin Name: PMPro Customizations
+Plugin URI: https://www.paidmembershipspro.com/wp/pmpro-customizations/
+Description: Customizations for my Paid Memberships Pro Setup
+Version: .1
+Author: Paid Memberships Pro
+Author URI: https://www.paidmembershipspro.com
+*/
+ 
+//Now start placing your customization code below this line
+
+function my_pmpro_email_headers_admin_emails( $headers, $email ) {
+//bcc checkout emails
+if ( strpos( $email->template, "invoice" ) !== false || strpos( $email->template, "admin_notification_approval" ) !== false ) {
+    //add bcc
+    $headers[] = "Bcc:" . "ecsca.membership@gmail.com";
+}
+
+return $headers;
+}
+add_filter( "pmpro_email_headers", "my_pmpro_email_headers_admin_emails", 10, 2 );
+
+
+/*
+PMPro Additional Fields for Register Helper: 
+Description: Add Telephone field to Registration form.
+*/
+
+function pmpro_add_fields_to_checkout(){
+	//don't break if Register Helper is not loaded
+	if(!function_exists( 'pmprorh_add_registration_field' )) {
+		return false;
+	}
+	
+	$fields = array();
+
+	$fields[] = new PMProRH_Field(
+		'phone',					// input name, will also be used as meta key
+		'text',						// type of field
+		array(
+			'label'		=> 'Telephone',	// custom field label
+			'profile'	=> true,	// show in user profile
+			'memberslistcsv'  => true, // include when using export members to csv
+			'addmember'       => true, // include when using add member from admin
+			'required'        => true, // make field required
+		)
+	);
+	
+	$fields[] = new PMProRH_Field(
+		'additional_info',					// input name, will also be used as meta key
+		'textarea',						// type of field
+		array(
+			'label'		=> 'Volunteer Interests',	// custom field label
+			'profile'	=> 'only',	// show in user profile
+			'memberslistcsv'  => true, // include when using export members to csv
+			'addmember'       => true, // include when using add member from admin
+
+			
+		)
+	);
+
+	// SELECT
+		$fields[] = new PMProRH_Field(
+		'member_type_by_admin', // input field name, used as meta key
+		'select', // field type
+			array(
+				'label' => 'Select Member Type',
+				'profile' => 'only_admin',
+				'memberslistcsv' => true,
+				'addmember' => true,
+				'required' => false,
+			'options' 	=> array(
+			"" 		=> "Please Select",
+			'regular' 	=> 'Regular',
+			'junior' 	=> 'Junior',
+			'associate' => 'Associate',
+			'life' 		=> 'Life',
+		),
+    )
+);
+
+
+
+
+	// SELECT
+	$fields[] = new PMProRH_Field(
+		'member_type', // input field name, used as meta key
+		'select',         // field type
+		array(
+			'label'          => 'Newsletters & ECSCA Info Delivery Method',
+			'options'        => array(
+				''         => '',    // blank option displayed first
+				'Email' => 'Email',
+				'USPS' => 'USPS',
+			),
+			'profile'        => 'true',
+			'memberslistcsv' => true,
+			'addmember'      => true,
+			'required'       => false,
+		)
+	);
+
+
+/**
+ * This recipe is an example of how to change localized text strings
+ * for PMPro Member Directory Add On.
+ *
+ * You can add this recipe to your site by creating a custom plugin
+ * or using the Code Snippets plugin available for free in the WordPress repository.
+ * Read this companion article for step-by-step directions on either method.
+ * https://www.paidmembershipspro.com/create-a-plugin-for-pmpro-customizations/
+ */
+
+/**
+ * @link http://codex.wordpress.org/Plugin_API/Filter_Reference/gettext
+ */
+function change_start_date_for_member_directory_and_profile_pages( $translated_text, $text, $domain ) {
+	if ( 'pmpromd' === $domain || 'pmpro-member-directory' === $domain || 'paid-memberships-pro' === $domain ) {
+		switch ( $text ) {
+			case 'Start Date':
+				$translated_text = __( 'Online Membership Enrollment Date', 'pmpro-member-directory' );
+				break;
+		}
+	}
+	return $translated_text;
+}
+add_filter( 'gettext', 'change_start_date_for_member_directory_and_profile_pages', 20, 3 );
+
+
+/**
+ * This recipe creates custom fields for membership registration.
+ *
+ * @requires Register Helper Add On
+ * @link https://www.paidmembershipspro.com/add-ons/pmpro-register-helper-add-checkout-and-profile-fields/
+ *
+ * You can add this recipe to your site by creating a custom plugin
+ * or using the Code Snippets plugin available for free in the WordPress repository.
+ * Read this companion article for step-by-step directions on either method.
+ * https://www.paidmembershipspro.com/create-a-plugin-for-pmpro-customizations/
+ */
+function my_pmprorh_initial_memberships_start_date() {
+	// don't break if Register Helper is not loaded
+	if ( ! function_exists( 'pmprorh_add_registration_field' ) ) {
+		return false;
+	}
+
+	// define the fields
+	$fields = array();
+	// TEXT FIELD
+	$fields[] = new PMProRH_Field(
+		'club_membership_start_year', // input field name, used as meta key
+		'number',         // field type
+		array(
+			'label'           => 'Initial Club Membership Start Year', // display custom label, if not used field name will be used
+			'required'        => true, // make field required
+			'html_attributes' => array(
+				'placeholder' => 'e.g., 2001',
+				'required'    => 'required',
+			), // add valid html input field attributes
+			'profile'         => true, // show on profile, set to 'only' to show on the profile edit page only.
+			'memberslistcsv'  => true, // include when using export members to csv
+			'addmember'       => true, // include when using add member from admin
+		)
+	);
+
+	foreach ( $fields as $field ) {
+
+		pmprorh_add_registration_field(
+			'checkout_boxes', // location on checkout page
+			$field     // PMProRH_Field object
+		);
+	}
+	unset( $field );
+
+	// that's it. see the PMPro Register Helper readme for more information and examples.
+}
+add_action( 'init', 'my_pmprorh_initial_memberships_start_date' );
+
+
+
+
+
+
+
+	//add the fields to default forms
+	foreach($fields as $field){
+		pmprorh_add_registration_field(
+			'checkout_boxes', // location on checkout page
+			$field	// PMProRH_Field object
+		);
+	}
+}
+add_action( 'init', 'pmpro_add_fields_to_checkout' );
+
