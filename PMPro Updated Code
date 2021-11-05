@@ -1,6 +1,19 @@
 /* PMPRo updated code as of Oct 5th 2021
   Code list:
   
+  /*note- Found under >Public_htm>wp-content>plugins>PMPro-customizations>pmpro-customizations.php
+
+Original php code for the following:
+1) Additional Admin Approvers for new member registrations:
+2) Add telephone number field to registration form
+3) Volunteer Interests
+4) Member Type (Junior, Reg, Life, Associate)
+5) Newsletter & ECSCA Info Fields
+6) Online Membership Start Date.
+7) Initial Club Membership Start Date (Year).
+*/
+
+  
 
 
 
