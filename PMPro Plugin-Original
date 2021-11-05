@@ -8,6 +8,7 @@ Original php code for the following:
 5) Newsletter & ECSCA Info Fields
 6) Online Membership Start Date.
 7) Initial Club Membership Start Date (Year).
+*/
 
 
 <?php
