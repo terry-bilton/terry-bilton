@@ -10,6 +10,7 @@
 8) "Club Membership Start Year" in Admin, Directory & Profile pages.
 9) "Primary Volunteer Event Type" in Admin, Directory & Profile pages.
 10) "Secondary Volunteer Event Type" in Admin, Directory & Profile pages.
+11) Added code to increase search functions to encompass Username, 1st name, Last Name, email.
 */
 
 
@@ -271,3 +272,18 @@ function my_pmprorh_initial_memberships_start_date() {
 
 }
 add_action( 'init', 'my_pmprorh_initial_memberships_start_date' );
+
+/*
+ * Allow large JOIN operations in the Member Directory and Profiles Add On for Paid Memberships Pro.
+ *
+ * You can add this recipe to your site by creating a custom plugin
+ * or using the Code Snippets plugin available for free in the WordPress repository.
+ * Read this companion article for step-by-step directions on either method.
+ * https://www.paidmembershipspro.com/create-a-plugin-for-pmpro-customizations/
+ *
+ */
+function pmpromd_set_db_option() {
+  global $wpdb;
+  $wpdb->query( "SET SESSION SQL_BIG_SELECTS=1" );
+}
+add_action( 'init', 'pmpromd_set_db_option', 5 );
